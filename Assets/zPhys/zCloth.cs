@@ -10,6 +10,8 @@ public class zCloth : MonoBehaviour {
 
     void Start () {
         mesh = GetComponent<MeshFilter>().mesh;
+        colliderMesh = GetComponent<MeshCollider>().GetComponent<MeshFilter>().mesh;
+
         vertices = mesh.vertices;
         zList = new zUnit[vertices.Length];
         zUnit old = null;
@@ -19,7 +21,7 @@ public class zCloth : MonoBehaviour {
 
             zUnit z = new zUnit(vertices[i].x, vertices[i].z,  i==0||i==10);
             zList[i]=z;
-            //if (i % 11 == 0) old = null;
+            //if (i % 11 > 0);
                 zConstraint.ConnectUnits(z, old, false);
             if(i >= 11)zConstraint.ConnectUnits(z, zList[i-11], false);
             if (i >= 10) zConstraint.ConnectUnits(z, zList[i - 10], false);
@@ -34,7 +36,7 @@ public class zCloth : MonoBehaviour {
 	void Update () {
         foreach (var c in zConstraint.AllConstraints) {
             c.resolve();
-           // Debug.DrawLine(c.unit1.pos, c.unit2.pos);
+            Debug.DrawLine(c.unit1.pos, c.unit2.pos);
         }
 
         
@@ -49,5 +51,7 @@ public class zCloth : MonoBehaviour {
         }
         mesh.vertices = vertices;
         mesh.RecalculateBounds();
+        colliderMesh.vertices = vertices;
+        colliderMesh.RecalculateBounds();
     }
 }

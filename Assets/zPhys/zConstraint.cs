@@ -19,10 +19,9 @@ namespace zPhys
         public float dist;
         public float tearDist;// длина обрыва связи
 
-        public static float SPACING = 0.9f;//0.9f; // длина спокойной (не сжатой и не растянутой) связи
-        public static float SPRINGSTOP = 0.8f; // длина сжатой связи
+        public static float SPACING = 0.8f;//0.9f; // длина спокойной (не сжатой и не растянутой) связи
+        public static float SPRINGSTOP = 0.7f; // длина сжатой связи
         public static float TEARDIST = 15.5f;// длина обрыва связи
-        //public static float GLUEDIST = 30.873f;// приклеивание
         public bool isHide = false;
 
 
@@ -35,6 +34,8 @@ namespace zPhys
             tearDist = length * TEARDIST;
             isHide = ishide;
             minlength = length * SPRINGSTOP;
+            unit1.connectedTo.Add(unit2, this);
+            unit2.connectedTo.Add(unit1, this);
         }
 
 
@@ -50,35 +51,28 @@ namespace zPhys
             Vector2 delta = dpos * mul;
             
             if (dist <= this.length)
-            {
-                delta=delta*FREEZE;
-                unit1.AddForce(-delta);
-                unit2.AddForce(delta);
-                if (dist <= minlength)
-                {
-                    unit1.stop();
-                    unit2.stop();
-                }
-                return null;
-            }
-            if (dist > this.length)
-            {
-                delta = delta * ELASTICITY;
-                unit1.AddForce(delta);
-                unit2.AddForce(-delta);
-                if (dist > tearDist)
-                {
-                    unit1.stop();
-                    unit2.stop();
-                }
-            }
+                delta=delta * -FREEZE; else  delta = delta * ELASTICITY;
+            moveUnits(delta);
             return null;
+        }
+
+        private void moveUnits(Vector2 delta)
+        {
+            unit1.AddForce(delta);
+            unit2.AddForce(-delta);
+            if (dist > tearDist||dist< minlength)
+            {
+                unit1.stop();
+                unit2.stop();
+            }
         }
 
         internal static void ConnectUnits(zUnit z1, zUnit z2, bool isHide)
         {
             if (z1 == null) return;
             if (z2 == null) return;
+            if (z1.connectedTo.ContainsKey(z2)) return;
+            if (z2.connectedTo.ContainsKey(z1)) return;
             zConstraint c = new zConstraint(z1, z2, isHide);
             AllConstraints.Add(c);
         }

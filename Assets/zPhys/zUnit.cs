@@ -12,11 +12,13 @@ public class zUnit
         public Vector2 prevpos;
         public Vector2 force;
         public bool isPinned = false;
+        public bool useStop = true;
 
-        float friction = 0.299f;
+        float friction = 0.5299f;
         float delta = 17.216f;
         float gravity = -0.00333f;
         float bounce = 0.5f;
+        public Dictionary<zUnit, zConstraint> connectedTo  = new Dictionary<zUnit, zConstraint>();
 
         public zUnit(Vector3 v, bool isPin)
         {
@@ -60,7 +62,7 @@ public class zUnit
         }
 
         public zUnit stop() {
-            pos = new Vector2(prevpos.x, prevpos.y);
+            if(useStop) pos = new Vector2(prevpos.x, prevpos.y);
             return this;
 
         }
