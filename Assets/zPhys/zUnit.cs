@@ -7,6 +7,7 @@ using System;
 namespace zPhys { 
 public class zUnit 
 {
+        public Vector2 startPos;
         public Vector2 pos;
         public Vector2 prevpos;
         public Vector2 force;
@@ -23,6 +24,7 @@ public class zUnit
             pos = new Vector2(v.x, v.y);
             force = new Vector2(0.0f, 0.0f);
             prevpos = new Vector2(v.x, v.y);
+            startPos = new Vector2(v.x, v.y);
         }
 
 
@@ -32,6 +34,7 @@ public class zUnit
             pos = new Vector2(x, y);
             force = new Vector2(0.0f, 0.0f);
             prevpos = new Vector2(x, y);
+            startPos = new Vector2(x, y);
         }
 
 
@@ -41,25 +44,14 @@ public class zUnit
             return this;
         }
 
-        public zUnit update(Vector2 bound)
+        public zUnit update()
         {
             if (isPinned) return this;
             AddForce(new Vector2(0, gravity));
             Vector2 npos = (pos - prevpos) * friction + force * delta;
             float dist = npos.magnitude;
             npos += pos;
-            if (bound != null)
-            {
-                if (npos.x >= bound.x)
-                    npos.x = bound.x + (bound.x - npos.x) * bounce;
-                else if (npos.x <= 0)
-                    npos.x *= -1 * bounce;
-                
-                if (npos.y >= bound.y)
-                    npos.y = bound.y + (bound.y - npos.y) * bounce;
-                else if (npos.y <= 0)
-                    npos.y *= -1 * bounce;
-            }
+
             prevpos = pos;
             if (dist < zConstraint.TEARDIST)
             pos = npos;

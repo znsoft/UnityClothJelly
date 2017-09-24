@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using zPhys;
 
-public class NewBehaviourScript : MonoBehaviour {
+public class zCloth : MonoBehaviour {
     zUnit[] zList;
     Vector3[] vertices;
     Mesh mesh,colliderMesh;
@@ -16,7 +16,8 @@ public class NewBehaviourScript : MonoBehaviour {
         int i = 0;
         while (i < vertices.Length)
         {
-            zUnit z = new zUnit(vertices[i].x, vertices[i].z,  old==null);
+
+            zUnit z = new zUnit(vertices[i].x, vertices[i].z,  i==0||i==10);
             zList[i]=z;
             //if (i % 11 == 0) old = null;
                 zConstraint.ConnectUnits(z, old, false);
@@ -41,14 +42,12 @@ public class NewBehaviourScript : MonoBehaviour {
         while (i < zList.Length)
         {
             zUnit z = zList[i];
-            z.update(new Vector2(10,10));
+            z.update();
             Vector3 v = new Vector3(z.pos.x, vertices[i].y, z.pos.y);//,vertices[i].z+0.1f);
             vertices[i] = v;
             i++;
         }
         mesh.vertices = vertices;
         mesh.RecalculateBounds();
-       
-
     }
 }
