@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using UnityEditor;
+
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -13,10 +13,11 @@ public class zUnit
         public Vector2 force;
         public bool isPinned = false;
         public bool useStop = true;
+        public bool isEdge = false;
 
         float friction = 0.5299f;
-        float delta = 17.216f;
-        float gravity = -0.00333f;
+        float delta = 170.216f;
+        float gravity = -0.000333f;
         float bounce = 0.5f;
         public Dictionary<zUnit, zConstraint> connectedTo  = new Dictionary<zUnit, zConstraint>();
 
@@ -46,11 +47,11 @@ public class zUnit
             return this;
         }
 
-        public zUnit update()
+        public zUnit update(float deltaTime)
         {
             if (isPinned) return this;
-            AddForce(new Vector2(0, gravity));
-            Vector2 npos = (pos - prevpos) * friction + force * delta;
+            //AddForce(new Vector2(0, gravity));
+            Vector2 npos = (pos - prevpos) * friction + force * delta * deltaTime;
             float dist = npos.magnitude;
             npos += pos;
 

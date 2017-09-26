@@ -10,8 +10,10 @@ namespace zPhys
         public float FREEZE = 0.060f;
         public static float CONSTRAINTFRICTION = 0.57f;
         public static List<zConstraint> AllConstraints = new List<zConstraint>();
+//        public static List<zConstraint> EdgeConstraints = new List<zConstraint>();
         public zUnit unit1;
         public zUnit unit2;
+        public bool isEdge = false;
 
         public float minlength;
 
@@ -20,7 +22,7 @@ namespace zPhys
         public float tearDist;// длина обрыва связи
 
         public static float SPACING = 0.8f;//0.9f; // длина спокойной (не сжатой и не растянутой) связи
-        public static float SPRINGSTOP = 0.7f; // длина сжатой связи
+        public static float SPRINGSTOP = 0.6f; // длина сжатой связи
         public static float TEARDIST = 15.5f;// длина обрыва связи
         public bool isHide = false;
 
@@ -36,10 +38,12 @@ namespace zPhys
             minlength = length * SPRINGSTOP;
             unit1.connectedTo.Add(unit2, this);
             unit2.connectedTo.Add(unit1, this);
+
+           // isEdge = unit1.isEdge || unit2.isEdge;
         }
 
 
-        public zConstraint resolve()
+        public zConstraint resolve(float deltaTime)
         {
             Vector2 dpos = unit1.pos - unit2.pos;
             dist = dpos.magnitude;
