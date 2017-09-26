@@ -11,13 +11,13 @@ public class zCloth : MonoBehaviour {
     Mesh mesh;
     EdgeCollider2D colliderMesh;
     public int xSections = 10;
+
     List<zUnit> edges; 
 
     void Start ()
     {
-
         GenerateClothFromCurrentFigure();
-
+        
     }
 
     private void GenerateClothFromCurrentFigure()
@@ -62,8 +62,6 @@ public class zCloth : MonoBehaviour {
             if (edges.Contains(o.Key))continue;
             edges.Add(o.Key);
             FindEdgesRecursive(o.Key);
-            //break;
-  
         }
 
     }
@@ -71,6 +69,7 @@ public class zCloth : MonoBehaviour {
 
         void Update () {
         float delta = Time.deltaTime;
+        delta = 0.1f;
         foreach (var c in zConstraint.AllConstraints) {
             c.resolve(delta);
             if(c.isEdge)Debug.DrawLine(c.unit1.pos, c.unit2.pos);
@@ -91,12 +90,22 @@ public class zCloth : MonoBehaviour {
 
         i = 0;
         foreach (var c in edges)
-            cVertices[i++] = c.pos;
+            cVertices[i++] =  c.pos;// new Vector2(transform.localScale.x * c.pos.x, transform.localScale.y * c.pos.y) + new Vector2(transform.position.x, transform.position.y) ;
 
         mesh.vertices = vertices;
         mesh.RecalculateBounds();
         colliderMesh.points = cVertices;
+        
     }
+
+
+    public void Hit(Vector2 point) {
+        List<zUnit> tmp = new List<zUnit>();
+        tmp.AddRange(zList);
+        zUnit hitUnit = FindZUnit(tmp, point);
+        if (hitUnit != null) { hitUnit.pos = point; }
+    }
+
 
     void OnCollisionEnter2D(Collision2D coll)
     {
@@ -109,7 +118,7 @@ public class zCloth : MonoBehaviour {
         foreach (var c in coll.contacts)
         {
             zUnit z = FindZUnit(edges, c.point);
-            Vector2 f = c.relativeVelocity * 0.001f * c.rigidbody.mass + new Vector2(0,-0.001f * c.rigidbody.mass);
+            Vector2 f = c.relativeVelocity * 0.001f * c.rigidbody.mass + c.normal * 0.001f * c.rigidbody.mass;
             z.AddForce(f);
 
         }
@@ -117,6 +126,7 @@ public class zCloth : MonoBehaviour {
 
     void OnCollisionStay2D(Collision2D coll)
     {
+        
         RenderCollisions(coll);
     }
 
