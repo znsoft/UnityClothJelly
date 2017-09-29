@@ -8,9 +8,8 @@ namespace zPhys
     {
         public float ELASTICITY = 0.010f;
         public float FREEZE = 0.060f;
-        public static float CONSTRAINTFRICTION = 0.57f;
-        public static List<zConstraint> AllConstraints = new List<zConstraint>();
-//        public static List<zConstraint> EdgeConstraints = new List<zConstraint>();
+        public float CONSTRAINTFRICTION = 0.57f;
+
         public zUnit unit1;
         public zUnit unit2;
         public bool isEdge = false;
@@ -21,8 +20,8 @@ namespace zPhys
         public float dist;
         public float tearDist;// длина обрыва связи
 
-        public static float SPACING = 0.8f;//0.9f; // длина спокойной (не сжатой и не растянутой) связи
-        public static float SPRINGSTOP = 0.6f; // длина сжатой связи
+        public float SPACING = 0.8f;//0.9f; // длина спокойной (не сжатой и не растянутой) связи
+        public float SPRINGSTOP = 0.4f; // длина сжатой связи
         public static float TEARDIST = 15.5f;// длина обрыва связи
         public bool isHide = false;
 
@@ -31,28 +30,26 @@ namespace zPhys
         {
             this.unit1 = unit1;
             this.unit2 = unit2;
-            length = zConstraint.SPACING * unit1.getDistanceTo(unit2);
-            AllConstraints.Add(this);
+            length = SPACING * unit1.getDistanceTo(unit2);
+            
             tearDist = length * TEARDIST;
             isHide = ishide;
             minlength = length * SPRINGSTOP;
             unit1.connectedTo.Add(unit2, this);
             unit2.connectedTo.Add(unit1, this);
-
-           // isEdge = unit1.isEdge || unit2.isEdge;
         }
 
 
         public zConstraint resolve(float deltaTime)
         {
-            Vector2 dpos = unit1.pos - unit2.pos;
+            var dpos = unit1.pos - unit2.pos;
             dist = dpos.magnitude;
 
-            if (dist == this.length) return null;
+            if (dist==0.0f||dist == this.length) return null;
 
             float diff = (length - dist) / dist;
             float mul = diff * CONSTRAINTFRICTION * (1 - this.length / dist);
-            Vector2 delta = dpos * mul;
+            var delta = dpos * mul;
             
             if (dist <= this.length)
                 delta=delta * -FREEZE; else  delta = delta * ELASTICITY;
@@ -71,15 +68,6 @@ namespace zPhys
             }
         }
 
-        internal static void ConnectUnits(zUnit z1, zUnit z2, bool isHide)
-        {
-            if (z1 == null) return;
-            if (z2 == null) return;
-            if (z1.connectedTo.ContainsKey(z2)) return;
-            if (z2.connectedTo.ContainsKey(z1)) return;
-            zConstraint c = new zConstraint(z1, z2, isHide);
-            AllConstraints.Add(c);
-        }
 
 
 

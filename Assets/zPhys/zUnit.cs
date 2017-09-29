@@ -15,29 +15,31 @@ public class zUnit
         public bool useStop = true;
         public bool isEdge = false;
 
-        float friction = 0.5299f;
+        float friction = 0.65299f;
         float delta = 170.216f;
-        float gravity = -0.000333f;
-        float bounce = 0.5f;
+        
+        
         public Dictionary<zUnit, zConstraint> connectedTo  = new Dictionary<zUnit, zConstraint>();
 
-        public zUnit(Vector3 v, bool isPin)
+        public zUnit(Vector3 v, bool isPin, float friction)
         {
             isPinned = isPin;
             pos = new Vector2(v.x, v.y);
             force = new Vector2(0.0f, 0.0f);
             prevpos = new Vector2(v.x, v.y);
             startPos = new Vector2(v.x, v.y);
+            this.friction = friction;
         }
 
 
-        public zUnit(float x, float y, bool isPin)
+        public zUnit(float x, float y, bool isPin, float friction)
         {
             isPinned = isPin;
             pos = new Vector2(x, y);
             force = new Vector2(0.0f, 0.0f);
             prevpos = new Vector2(x, y);
             startPos = new Vector2(x, y);
+            this.friction = friction;
         }
 
 
@@ -50,13 +52,12 @@ public class zUnit
         public zUnit update(float deltaTime)
         {
             if (isPinned) return this;
-            //AddForce(new Vector2(0, gravity));
             Vector2 npos = (pos - prevpos) * friction + force * delta * deltaTime;
             float dist = npos.magnitude;
             npos += pos;
 
             prevpos = pos;
-            if (dist < zConstraint.TEARDIST)
+           // if (dist < zConstraint.TEARDIST)
             pos = npos;
             force = new Vector2(0.0f, 0.0f);
             return this;

@@ -11,6 +11,9 @@ public class zCloth : MonoBehaviour {
     Mesh mesh;
     EdgeCollider2D colliderMesh;
     public int xSections = 10;
+    public float friction = 0.5f;
+    public float elastic = 0.010f;
+    public float freeze = 0.060f;
 
     List<zUnit> edges; 
 
@@ -19,6 +22,20 @@ public class zCloth : MonoBehaviour {
         GenerateClothFromCurrentFigure();
         
     }
+
+     List<zConstraint> AllConstraints = new List<zConstraint>();
+    void ConnectUnits(zUnit z1, zUnit z2, bool isHide)
+    {
+        if (z1 == null) return;
+        if (z2 == null) return;
+        if (z1.connectedTo.ContainsKey(z2)) return;
+        if (z2.connectedTo.ContainsKey(z1)) return;
+        zConstraint c = new zConstraint(z1, z2, isHide);
+        c.ELASTICITY = elastic;
+        c.FREEZE = freeze;
+        AllConstraints.Add(c);
+    }
+
 
     private void GenerateClothFromCurrentFigure()
     {
@@ -33,13 +50,13 @@ public class zCloth : MonoBehaviour {
         while (i < vertices.Length)
         {
 
-            zUnit z = new zUnit(vertices[i].x, vertices[i].z, false);// i == 0 || i == xSections);
+            zUnit z = new zUnit(vertices[i].x, vertices[i].z, false , friction);// i == 0 || i == xSections);
             zList[i] = z;
 
-            if (i % xDiv > 0) { zConstraint.ConnectUnits(z, old, false); } else z.isEdge = true;
-            if (i >= xDiv) { zConstraint.ConnectUnits(z, zList[i - xDiv], false); } else z.isEdge = true;
-            if (i >= xSections && i % xDiv < xSections) { zConstraint.ConnectUnits(z, zList[i - xSections], false); } else z.isEdge = true;
-            if (i >= xDiv + 1 && i % xDiv > 0) { zConstraint.ConnectUnits(z, zList[i - xDiv - 1], false); } else z.isEdge = true;
+            if (i % xDiv > 0) { ConnectUnits(z, old, false); } else z.isEdge = true;
+            if (i >= xDiv) { ConnectUnits(z, zList[i - xDiv], false); } else z.isEdge = true;
+            if (i >= xSections && i % xDiv < xSections) { ConnectUnits(z, zList[i - xSections], false); } else z.isEdge = true;
+            if (i >= xDiv + 1 && i % xDiv > 0) { ConnectUnits(z, zList[i - xDiv - 1], false); } else z.isEdge = true;
             if (vertices.Length < i + 10) z.isEdge = true;
             old = z;
             if (z.isEdge) lastEdge = z;
@@ -70,7 +87,7 @@ public class zCloth : MonoBehaviour {
         void Update () {
         float delta = Time.deltaTime;
         delta = 0.1f;
-        foreach (var c in zConstraint.AllConstraints) {
+        foreach (var c in AllConstraints) {
             c.resolve(delta);
             if(c.isEdge)Debug.DrawLine(c.unit1.pos, c.unit2.pos);
         }
