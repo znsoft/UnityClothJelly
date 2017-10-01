@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using zPhys;
 
-public class zCloth : MonoBehaviour {
+public class zCloth : MonoBehaviour
+{
     zUnit[] zList;
     Vector3[] vertices;
     Vector2[] cVertices;
@@ -14,16 +15,16 @@ public class zCloth : MonoBehaviour {
     public float friction = 0.5f;
     public float elastic = 0.010f;
     public float freeze = 0.060f;
+    zUnit selected;
+    List<zUnit> edges;
 
-    List<zUnit> edges; 
-
-    void Start ()
+    void Start()
     {
         GenerateClothFromCurrentFigure();
-        
+
     }
 
-     List<zConstraint> AllConstraints = new List<zConstraint>();
+    List<zConstraint> AllConstraints = new List<zConstraint>();
     void ConnectUnits(zUnit z1, zUnit z2, bool isHide)
     {
         if (z1 == null) return;
@@ -50,7 +51,7 @@ public class zCloth : MonoBehaviour {
         while (i < vertices.Length)
         {
 
-            zUnit z = new zUnit(vertices[i].x, vertices[i].z, false , friction);// i == 0 || i == xSections);
+            zUnit z = new zUnit(vertices[i].x, vertices[i].z, false, friction);// i == 0 || i == xSections);
             zList[i] = z;
 
             if (i % xDiv > 0) { ConnectUnits(z, old, false); } else z.isEdge = true;
@@ -71,12 +72,13 @@ public class zCloth : MonoBehaviour {
     }
 
 
-    void FindEdgesRecursive(zUnit z) {
+    void FindEdgesRecursive(zUnit z)
+    {
         foreach (var o in z.connectedTo)
         {
             if (!o.Key.isEdge) continue;
             o.Value.isEdge = true;
-            if (edges.Contains(o.Key))continue;
+            if (edges.Contains(o.Key)) continue;
             edges.Add(o.Key);
             FindEdgesRecursive(o.Key);
         }
@@ -84,12 +86,15 @@ public class zCloth : MonoBehaviour {
     }
 
 
-        void Update () {
+    void Update()
+    {
         float delta = Time.deltaTime;
-        delta = 0.1f;
-        foreach (var c in AllConstraints) {
+        //delta = 0.1f;
+        if (delta > 0) delta = 1 / delta;
+        foreach (var c in AllConstraints)
+        {
             c.resolve(delta);
-            if(c.isEdge)Debug.DrawLine(c.unit1.pos, c.unit2.pos);
+            if (c.isEdge) Debug.DrawLine(c.unit1.pos, c.unit2.pos);
         }
 
 
@@ -107,26 +112,41 @@ public class zCloth : MonoBehaviour {
 
         i = 0;
         foreach (var c in edges)
-            cVertices[i++] =  c.pos;// new Vector2(transform.localScale.x * c.pos.x, transform.localScale.y * c.pos.y) + new Vector2(transform.position.x, transform.position.y) ;
+            cVertices[i++] = c.pos;
 
         mesh.vertices = vertices;
         mesh.RecalculateBounds();
         colliderMesh.points = cVertices;
-        
+
     }
 
 
-    public void Hit(Vector2 point) {
-        List<zUnit> tmp = new List<zUnit>();
-        tmp.AddRange(zList);
-        zUnit hitUnit = FindZUnit(tmp, point);
-        if (hitUnit != null) { hitUnit.pos = point; }
+    public void Hit(Vector2 point)
+    {
+        zUnit hitUnit;
+        Vector2 local = transform.InverseTransformPoint(point);
+        if (selected == null)
+        {
+            List<zUnit> tmp = new List<zUnit>();
+            tmp.AddRange(zList);
+            hitUnit = FindZUnit(tmp, local);
+            hitUnit.isPinned = true;
+        }
+        else
+        {
+            hitUnit = selected;
+        }
+        if (hitUnit != null) { hitUnit.pos = local; selected = hitUnit; }
+    }
+    public void UnHit()
+    {
+        if (selected != null) selected.isPinned = false;
+        selected = null;
     }
 
 
     void OnCollisionEnter2D(Collision2D coll)
     {
-        // Debug.Log(coll.gameObject.name);
         RenderCollisions(coll);
     }
 
@@ -134,7 +154,8 @@ public class zCloth : MonoBehaviour {
     {
         foreach (var c in coll.contacts)
         {
-            zUnit z = FindZUnit(edges, c.point);
+            Vector2 local = transform.InverseTransformPoint(c.point);
+            zUnit z = FindZUnit(edges, local);
             Vector2 f = c.relativeVelocity * 0.001f * c.rigidbody.mass + c.normal * 0.001f * c.rigidbody.mass;
             z.AddForce(f);
 
@@ -143,7 +164,7 @@ public class zCloth : MonoBehaviour {
 
     void OnCollisionStay2D(Collision2D coll)
     {
-        
+
         RenderCollisions(coll);
     }
 
@@ -151,7 +172,8 @@ public class zCloth : MonoBehaviour {
     {
         zUnit result = null;
         float minDist = float.MaxValue;
-        foreach (var unit in edges) {
+        foreach (var unit in edges)
+        {
             float near = (unit.pos - point).magnitude;
             if (near < minDist) { minDist = near; result = unit; }
         }

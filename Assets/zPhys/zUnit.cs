@@ -16,7 +16,8 @@ public class zUnit
         public bool isEdge = false;
 
         float friction = 0.65299f;
-        float delta = 170.216f;
+        float delta = 0.216f;
+        
         
         
         public Dictionary<zUnit, zConstraint> connectedTo  = new Dictionary<zUnit, zConstraint>();
