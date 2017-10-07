@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Touches.cs" />
+    <Compile Include="Assets\zGui.cs" />
     <Compile Include="Assets\zPhys\zCloth.cs" />
     <Compile Include="Assets\zPhys\zConstraint.cs" />
     <Compile Include="Assets\zPhys\zUnit.cs" />
