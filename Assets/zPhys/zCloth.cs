@@ -12,8 +12,11 @@ public class zCloth : MonoBehaviour
     Mesh mesh;
     EdgeCollider2D colliderMesh;
     public int xSections = 10;
+    [Range(0,1)]
     public float friction = 0.5f;
+    [Range(0, 0.1f)]
     public float elastic = 0.010f;
+    [Range(0, 1.0f)]
     public float freeze = 0.060f;
     zUnit selected;
     List<zUnit> edges;
@@ -68,7 +71,7 @@ public class zCloth : MonoBehaviour
 
         FindEdgesRecursive(lastEdge);
 
-        cVertices = new Vector2[edges.Count];
+        cVertices = new Vector2[edges.Count+1];
     }
 
 
@@ -116,6 +119,7 @@ public class zCloth : MonoBehaviour
 
         mesh.vertices = vertices;
         mesh.RecalculateBounds();
+        cVertices[i++] = edges[0].pos;
         colliderMesh.points = cVertices;
 
     }

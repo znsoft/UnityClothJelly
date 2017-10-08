@@ -84,6 +84,12 @@
     <Compile Include="Assets\zPhys\zConstraint.cs" />
     <Compile Include="Assets\zPhys\zUnit.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Music\DnB.xml" />
+    <None Include="Assets\Music\Socceroos-Progress.xml" />
+    <None Include="Assets\Music\StrictProduction-DearJonDoe.xml" />
+    <None Include="Assets\Unlit-AlphaTest.shader" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
 </Project>
