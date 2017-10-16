@@ -119,7 +119,9 @@ public enum TrackType
 	bbtrack,
 	bbtco,
 	pattern,
-	note
+	note,
+	instrumenttrack
+
 }
 
 public class TrackNode
@@ -136,10 +138,11 @@ public class TrackNode
 	public Dictionary<string, string> attributes;
 	public int pos;
 	public int len;
-	public zNote note;
-	public zSequence seq;
+	public zInstrument instr;
+	public int note;
 	public zChannel chan;
 	zPattern[] patterns;
+	public zPlayer player;
 	
 	public TrackNode (TrackNode Parent, XmlNode xmlNode)
 	{
@@ -176,15 +179,9 @@ public class TrackNode
 	{
 		if (tracktype != TrackType.note)
 			return;
-		note = new zNote ();
 		string p;
 		if (attributes.TryGetValue ("key", out p))
-			note.note = Int32.Parse (p);
-		note.len = len;
-		//string v;
-		//if (attributes.TryGetValue("vol", out v))
-		//  note = Int32.Parse(v);
-		
+			note = Int32.Parse (p);
 	}
 	
 	private void CalcDiv ()
@@ -204,13 +201,11 @@ public class TrackNode
 	
 	private void CalcSongLen ()
 	{
-		//if (tracktype == TrackType.pattern) {
 		int pl = pos + len;
 		if (pl > maxpos)
 			maxpos = pl;
 		name = name + patternnum.ToString ();
 		patternnum++;
-		//}
 	}
 	
 	private void BuildTree ()
@@ -226,7 +221,7 @@ public class TrackNode
 	public void CalcSong ()
 	{
 		
-		
+		if(parent!=null)player = parent.player;
 		switch (tracktype) {
 		case TrackType.pattern:
 			chan = parent.chan;
@@ -234,11 +229,16 @@ public class TrackNode
 				return;
 			CalcPattern ();
 			break;
+		case TrackType.instrumenttrack:
+			chan = parent.chan;
+
+			instr = new zInstrument(null,chan,null,null,null,null,null,null,null,null,null,null,null);
+			break;
 		case TrackType.track:
 			
 			chan = new zChannel ();
 			chan.name = name;
-			chan.instr = new zInstrument (zInstrumentType.FM);
+
 			
 			chan.patterns = CalcPatLen ();
 			patterns = chan.patterns;
@@ -247,13 +247,13 @@ public class TrackNode
 			parent.seq.Put (pos, chan);
 			break;
 		case TrackType.song:
+			player = new zPlayer();
 			foreach (var child in childs)
 				child.CalcSong ();
-			parent.seq = seq;
+			parent.player = player;
 			break;
 		case TrackType.trackcontainer:
-			seq = new zSequence (pos, len, div);
-			parent.seq = seq;
+			player = parent.player;
 			foreach (var child in childs)
 				child.CalcSong ();
 			break;
@@ -318,15 +318,14 @@ public class zPlayer
 	int OneSecTickLen = 1;
 	int TickCounter;
 	int pos;
-	public zTimeTick[] seq;
+
 	public List<zInstrument> instruments;
 	
-	public zPlayer (int len, zTimeTick[] seq)
+	public zPlayer ()
 	{
 		double sampling_frequency = (double)AudioSettings.outputSampleRate;
 		OneSecTickLen = (int)(sampling_frequency / 2);
 		pos = 0;
-		this.seq = seq;
 	}
 	
 	public void Play (float[] data, int channels)
